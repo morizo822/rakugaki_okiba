@@ -1,24 +1,119 @@
 <html>
 <head>
-<link href="style.css" rel="stylesheet" type="text/css"
-<title></title>
+<link href="style.css" rel="stylesheet" type="text/css">
+<title>ラクガキ置き場</title>
 </head>
+
+<body>
 <h1 class="logo-container">
   <img src="z/taitoru_logo.JPG" alt="ラクガキ置き場" width="1260">
 </h1>
-<body>
+
 こんちくわ～<p>
 <h2>画像、こうかいしちゃいます</h2>
 授業中に描きました<p>
 </br>
 使用ソフトはペイント<p>
 
-<img src="z/nekonekonejkonejko.png" alt="neko" width=""630" height="315">
-<img src="z/ssdfghjbg.png" alt="neko" width=""630" height="315">
-<img src="z/ｷﾞｬﾗｸﾃｶスーパーネッコ.png" alt="neko" width=""630" height="315">
-<img src="z/スーパーオメガカブトムシZ.png" alt="neko" width=""630" height="315">
-どうでしたか？<p>
-さらに公開します<p>
-<img src="z/messageImage_1713147487318.jpg" alt="neko" width=""630" height="315">
+<img src="z/nekonekonejkonejko.png" alt="neko" width="630" height="315">
+<img src="z/ssdfghjbg.png" alt="neko" width="630" height="315">
+<img src="z/ｷﾞｬﾗｸﾃｶスーパーネッコ.png" alt="neko" width="630" height="315">
+<img src="z/スーパーオメガカブトムシZ.png" alt="neko" width="630" height="315">
+
+<p>どうでしたか？</p>
+<p>さらに公開します</p>
+
+<img src="z/messageImage_1713147487318.jpg" alt="neko" width="630" height="315">
+
+<hr>
+
+<div class="art-work">
+  <h3>ひとこと掲示板</h3>
+  <p>感想を書いてね！</p>
+  <input type="text" id="userName" placeholder="なまえ" style="width: 200px;"><br>
+  <textarea id="userComment" placeholder="コメント" style="width: 300px; height: 100px; margin-top: 10px;"></textarea><br>
+  <button type="button" onclick="sendData()" style="margin-top: 10px; padding: 5px 20px;">送信する</button>
+</div>
+
+<hr>
+<h3>みんなのコメント</h3>
+<div id="commentList">読み込み中...</div>
+
+<script>
+// 【重要】GASで「新しいデプロイ」を行った際の最新URLをここに貼り付けてください
+const gasUrl = "https://script.google.com/macros/s/AKfycbyL3L31XzrX53VS4kvDNgxAuYmunkmbYBku06qtMhzzd6o7-47rJ4L-SrHBlA2uGdSr/exec";
+
+// ページが読み込まれたらコメントを表示
+window.onload = function() {
+  loadComments();
+};
+
+// 1. データを送信する関数
+async function sendData() {
+  const name = document.getElementById("userName").value;
+  const comment = document.getElementById("userComment").value;
+
+  if (!name || !comment) {
+    alert("なまえとコメントを入力してね！");
+    return;
+  }
+
+  const data = { name: name, comment: comment };
+
+  try {
+    await fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    
+    alert("送信しました！");
+    
+    // 【自動更新機能】ページをリロードして最新のコメントを表示
+    location.reload(); 
+    
+  } catch (error) {
+    console.error("エラー:", error);
+    alert("通信に失敗しました。");
+  }
+}
+
+// 2. データを読み込んで表示する関数
+async function loadComments() {
+  const listContainer = document.getElementById("commentList");
+
+  try {
+    const response = await fetch(gasUrl);
+    const data = await response.json();
+
+    listContainer.innerHTML = ""; 
+
+    if (data.length === 0) {
+      listContainer.innerHTML = "<p>まだコメントはありません。</p>";
+      return;
+    }
+
+    data.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "art-work";
+      div.style.display = "block";
+      div.style.marginBottom = "10px";
+      
+      const date = new Date(item.date).toLocaleString();
+      
+      div.innerHTML = `
+        <p style="font-size: 0.8em; color: #666;">${date} - <strong>${item.name}</strong> さん</p>
+        <p>${item.comment}</p>
+      `;
+      listContainer.appendChild(div);
+    });
+  } catch (error) {
+    console.error("読み込みエラー:", error);
+    listContainer.innerHTML = "<p>コメントの読み込みに失敗しました。</p>";
+  }
+}
+</script>
+
 </body>
 </html>
