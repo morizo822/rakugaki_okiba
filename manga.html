@@ -2,39 +2,115 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>漫画ビューア - コミック6owari</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>漫画ビューア</title>
   <style>
     body { background-color: #1a1a1a; color: white; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
-    .manga-wrapper { display: flex; justify-content: center; align-items: center; height: 90vh; width: 100vw; margin-top: 10px; }
-    .manga-container { position: relative; display: flex; flex-direction: row-reverse; height: 100%; max-width: 95%; }
-    .manga-image { height: 100%; width: auto; max-width: 100%; object-fit: contain; border: 1px solid #333; }
+    
+    /* 漫画表示エリア */
+    .manga-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .manga-container {
+      position: relative;
+      display: flex;
+      flex-direction: row-reverse;
+      height: 100%;
+      max-width: 100%;
+    }
+
+    .manga-image {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
     .img-hidden { display: none !important; }
-    @media (orientation: portrait) and (max-width: 768px) { .manga-container { width: 100%; } .manga-image { width: 100%; height: auto; } }
-    .touch-area { position: absolute; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; }
-    .next-area { left: 0; } .prev-area { right: 0; }
-    .page-info { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.9em; color: #ccc; }
-    nav { background-color: #333; padding: 10px 0; text-align: center; }
-    nav a { color: white; text-decoration: none; font-size: 14px; }
+
+    /* UIオーバーレイ */
+    .ui-overlay {
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ui-visible { opacity: 1; pointer-events: auto; }
+
+    nav { top: 0; background-color: rgba(51, 51, 51, 0.8); padding: 15px 0; text-align: center; }
+    nav a { color: white; text-decoration: none; font-size: 14px; margin: 0 15px; }
+
+    .controls-bottom { bottom: 0; background-color: rgba(0, 0, 0, 0.6); padding: 20px 0; text-align: center; }
+
+    #fullscreen-btn {
+      background: #444;
+      color: white;
+      border: 1px solid #666;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .page-info { font-size: 0.9em; color: #ccc; }
+
+    /* タッチ・クリックエリア設定 */
+    .center-touch {
+      position: absolute;
+      top: 15%;
+      left: 25%;
+      width: 50%;
+      height: 70%;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    .side-touch { position: absolute; top: 0; height: 100%; width: 25%; z-index: 40; cursor: pointer; }
+    .next-area { left: 0; }
+    .prev-area { right: 0; }
+
+    @media (orientation: portrait) and (max-width: 768px) {
+      .manga-container { width: 100%; }
+      .manga-image { width: 100%; height: auto; }
+    }
   </style>
 </head>
 <body>
 
-<nav><a href="manga-list.html">一覧に戻る</a></nav>
+<nav id="nav-ui" class="ui-overlay">
+  <a href="manga-list.html">一覧に戻る</a>
+</nav>
 
-<div class="manga-wrapper">
+<div class="manga-wrapper" id="viewer">
   <div class="manga-container">
-    <img id="manga-image-right" class="manga-image" src="" alt="page-right">
-    <img id="manga-image-left" class="manga-image" src="" alt="page-left">
-    <div class="touch-area next-area" onclick="changePage(true)"></div>
-    <div class="touch-area prev-area" onclick="changePage(false)"></div>
+    <img id="manga-image-right" class="manga-image" src="" alt="">
+    <img id="manga-image-left" class="manga-image" src="" alt="">
+
+    <div class="side-touch next-area" onclick="changePage(true)"></div>
+    <div class="center-touch" onclick="toggleUI()"></div>
+    <div class="side-touch prev-area" onclick="changePage(false)"></div>
   </div>
 </div>
 
-<div class="page-info"><span id="current-page">1</span> / <span id="total-pages">0</span></div>
+<div id="footer-ui" class="ui-overlay controls-bottom">
+  <button id="fullscreen-btn" onclick="toggleFullscreen()">全画面表示</button>
+  <div class="page-info">
+    <span id="current-page">1</span> / <span id="total-pages">0</span>
+  </div>
+</div>
 
 <script>
-  const images = [
+  // --- ここにGASで取得した画像URLリストを貼り付けてください ---
+ const images = [
   "https://lh3.googleusercontent.com/d/1wFAF2st7zb_yuCxaP64cf9qSc_UC-z6x", // コミック6owari_001.png
 "https://lh3.googleusercontent.com/d/1H0E1_j-5DyKkZXzN0uHw689xGJZyqFox", // コミック6owari_002.png
 "https://lh3.googleusercontent.com/d/1jP4pBeh6RizWmcthvLnPx5WWkqhjhdjd", // コミック6owari_003.png
@@ -65,15 +141,51 @@
 "https://lh3.googleusercontent.com/d/1n8kqnv5Jxs-G6YM5gqMoJ3RX1mU1lFHF", // コミック6owari_028.png
   ];
 
+  // -------------------------------------------------------
+
   let currentIndex = 0;
+  let uiTimer;
   const imgRight = document.getElementById("manga-image-right");
   const imgLeft = document.getElementById("manga-image-left");
   const pageText = document.getElementById("current-page");
   document.getElementById("total-pages").innerText = images.length;
 
+  // UIの表示切り替え（3秒で自動消去 ＆ 再タップで手動消去）
+  function toggleUI() {
+    const nav = document.getElementById("nav-ui");
+    const footer = document.getElementById("footer-ui");
+    const isVisible = nav.classList.contains("ui-visible");
+
+    if (isVisible) {
+      nav.classList.remove("ui-visible");
+      footer.classList.remove("ui-visible");
+      clearTimeout(uiTimer);
+    } else {
+      nav.classList.add("ui-visible");
+      footer.classList.add("ui-visible");
+      clearTimeout(uiTimer);
+      uiTimer = setTimeout(() => {
+        nav.classList.remove("ui-visible");
+        footer.classList.remove("ui-visible");
+      }, 3000); // 3秒に変更
+    }
+  }
+
+  // 全画面表示の切り替え
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert(`全画面表示エラー: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
   function updateDisplay() {
     const isLandscape = window.innerWidth > window.innerHeight;
     if (currentIndex === 0) {
+      // 1枚目は左側に表示
       imgLeft.src = images[0];
       imgLeft.classList.remove("img-hidden");
       imgRight.classList.add("img-hidden");
@@ -105,7 +217,11 @@
       if (currentIndex === 0) { currentIndex = 1; }
       else {
         const step = isLandscape ? 2 : 1;
-        if (currentIndex + step >= images.length) { alert("最後のページです"); location.href = "manga-list.html"; return; }
+        if (currentIndex + step >= images.length) {
+          alert("最後のページです");
+          location.href = "manga-list.html";
+          return;
+        }
         currentIndex += step;
       }
     } else {
@@ -114,6 +230,19 @@
     }
     updateDisplay();
   }
+
+  // スマホのスワイプ操作
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+
+  document.addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const swipeThreshold = 50;
+    if (touchEndX < touchStartX - swipeThreshold) changePage(true);  // 左スワイプで進む
+    if (touchEndX > touchStartX + swipeThreshold) changePage(false); // 右スワイプで戻る
+  }, false);
 
   updateDisplay();
   window.addEventListener('resize', updateDisplay);
