@@ -70,3 +70,18 @@ img {
   text-shadow: 0 0 5px #0f0;   /* 文字を光らせる */
   font-weight: bold;
 }
+
+.zoom-img {
+  transition: transform 0.3s ease;
+}
+.zoom-img:hover {
+  transform: scale(1.1);
+}
+
+/* コメント一覧のエリアにはみ出し防止の設定を追加 */
+#commentList .art-work {
+  word-wrap: break-word;     /* 長い単語を途中で改行させる */
+  overflow-wrap: break-word; /* 同上（新しいブラウザ用） */
+  max-width: 100%;           /* 親要素の幅を超えないようにする */
+  box-sizing: border-box;    /* 余白を含めたサイズ計算にする */
+}
