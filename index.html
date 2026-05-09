@@ -94,22 +94,21 @@ async function loadComments() {
     const response = await fetch(gasUrl);
     const result = await response.json();
 
-    // カウンターの反映
     if (result.counter !== undefined) {
       countDisplay.innerText = result.counter;
     }
 
     listContainer.innerHTML = ""; 
 
-    // コメントリストの表示
     if (!result.comments || result.comments.length === 0) {
       listContainer.innerHTML = "<p>まだコメントはありません。</p>";
       return;
     }
 
     function escapeHtml(str) {
-      if (!str) return "";
-      return str.replace(/[&<>"']/g, function(m) {
+      // コメントが数字（37564など）の場合でも文字列に変換して処理するように修正
+      const stringStr = String(str || "");
+      return stringStr.replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
       });
     }
