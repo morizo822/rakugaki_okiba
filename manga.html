@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漫画ビューア - コミック6owari</title>
+  <style>
+    body { background-color: #1a1a1a; color: white; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
+    .manga-wrapper { display: flex; justify-content: center; align-items: center; height: 90vh; width: 100vw; margin-top: 10px; }
+    .manga-container { position: relative; display: flex; flex-direction: row-reverse; height: 100%; max-width: 95%; }
+    .manga-image { height: 100%; width: auto; max-width: 100%; object-fit: contain; border: 1px solid #333; }
+    .img-hidden { display: none !important; }
+    @media (orientation: portrait) and (max-width: 768px) { .manga-container { width: 100%; } .manga-image { width: 100%; height: auto; } }
+    .touch-area { position: absolute; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; }
+    .next-area { left: 0; } .prev-area { right: 0; }
+    .page-info { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.9em; color: #ccc; }
+    nav { background-color: #333; padding: 10px 0; text-align: center; }
+    nav a { color: white; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<nav><a href="manga-list.html">一覧に戻る</a></nav>
+
+<div class="manga-wrapper">
+  <div class="manga-container">
+    <img id="manga-image-right" class="manga-image" src="" alt="page-right">
+    <img id="manga-image-left" class="manga-image" src="" alt="page-left">
+    <div class="touch-area next-area" onclick="changePage(true)"></div>
+    <div class="touch-area prev-area" onclick="changePage(false)"></div>
+  </div>
+</div>
+
+<div class="page-info"><span id="current-page">1</span> / <span id="total-pages">0</span></div>
+
+<script>
+  const images = [
+  "https://lh3.googleusercontent.com/d/1wFAF2st7zb_yuCxaP64cf9qSc_UC-z6x", // コミック6owari_001.png
+"https://lh3.googleusercontent.com/d/1H0E1_j-5DyKkZXzN0uHw689xGJZyqFox", // コミック6owari_002.png
+"https://lh3.googleusercontent.com/d/1jP4pBeh6RizWmcthvLnPx5WWkqhjhdjd", // コミック6owari_003.png
+"https://lh3.googleusercontent.com/d/16RN8mNzoZ5hZumtbvVrBIc3bAB306fu9", // コミック6owari_004.png
+"https://lh3.googleusercontent.com/d/1UyzWiNMYnxwYnb9_5HALmTcELf4gR3Sx", // コミック6owari_005.png
+"https://lh3.googleusercontent.com/d/1hM4GWchf0FVXU8s1cZrKAIRb-LFjNiKq", // コミック6owari_006.png
+"https://lh3.googleusercontent.com/d/1SD4Zc14LSGT3ez4Lr6ogJJycWlzxcU6-", // コミック6owari_007.png
+"https://lh3.googleusercontent.com/d/1FZ2c4hyi13T2HzwocJMKhajGxTQkOs5M", // コミック6owari_008.png
+"https://lh3.googleusercontent.com/d/1nVAPR8zVXgf83DqUGnkjNBntdOh1VJD0", // コミック6owari_009.png
+"https://lh3.googleusercontent.com/d/1mzY2nqyIn4H3dp3wL4DXgV66rTxc3xCg", // コミック6owari_010.png
+"https://lh3.googleusercontent.com/d/1n038faoy1r4JuytJyg6JqK75n4_5uNOi", // コミック6owari_011.png
+"https://lh3.googleusercontent.com/d/1ta8yHcvl-dz9tyTDUiYUZFpOZWOaTvh6", // コミック6owari_012.png
+"https://lh3.googleusercontent.com/d/1mYZpfmCRpY0ivfo8ipj2VvKTtXCjZM7X", // コミック6owari_013.png
+"https://lh3.googleusercontent.com/d/1lVu3BVSXHzu0H-gjnbFsEeuQUhGGldwC", // コミック6owari_014.png
+"https://lh3.googleusercontent.com/d/1GoNcFu7VMUC-H93MyHzGvpkWVp_0YiIa", // コミック6owari_015.png
+"https://lh3.googleusercontent.com/d/1kU2VLEHUVjEGNxfoL6p3VWxSlK0qs8tt", // コミック6owari_016.png
+"https://lh3.googleusercontent.com/d/1UsfN-4eJQU0n3araDv2Am6EC6spGwUEb", // コミック6owari_017.png
+"https://lh3.googleusercontent.com/d/1bGKSEBtAJqVC9KOVM46boL1ayr42VRe1", // コミック6owari_018.png
+"https://lh3.googleusercontent.com/d/1odpQMCeI273vUWenVKE-uKE1V8FiwbpX", // コミック6owari_019.png
+"https://lh3.googleusercontent.com/d/1rqQOc22I7x9lW_5Eklbm5xkZWJDMEssr", // コミック6owari_020.png
+"https://lh3.googleusercontent.com/d/13f8rpIHI7b57JV6hPr0wYpslGLBJP9bc", // コミック6owari_021.png
+"https://lh3.googleusercontent.com/d/1cxpDjik02hUQMJiaaU6ghgXEoNyuHPzF", // コミック6owari_022.png
+"https://lh3.googleusercontent.com/d/1e3A6kcJ0cQdVOZrCkzZHsjriYo-5AoB-", // コミック6owari_023.png
+"https://lh3.googleusercontent.com/d/1AhbB9kShbNLhqixDoGgL82q_2tVZVplN", // コミック6owari_024.png
+"https://lh3.googleusercontent.com/d/1nlg8uPJ9lQpPFo_4UjjQHTVzmK30AOnt", // コミック6owari_025.png
+"https://lh3.googleusercontent.com/d/1kPVrmpp8RJnbtnD24EyXCqgj_saM9idd", // コミック6owari_026.png
+"https://lh3.googleusercontent.com/d/1VFV4dpvoaJoKxRCdPBJFOdlXjLySRfEa", // コミック6owari_027.png
+"https://lh3.googleusercontent.com/d/1n8kqnv5Jxs-G6YM5gqMoJ3RX1mU1lFHF", // コミック6owari_028.png
+  ];
+
+  let currentIndex = 0;
+  const imgRight = document.getElementById("manga-image-right");
+  const imgLeft = document.getElementById("manga-image-left");
+  const pageText = document.getElementById("current-page");
+  document.getElementById("total-pages").innerText = images.length;
+
+  function updateDisplay() {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    if (currentIndex === 0) {
+      imgLeft.src = images[0];
+      imgLeft.classList.remove("img-hidden");
+      imgRight.classList.add("img-hidden");
+      pageText.innerText = "1";
+    } else {
+      if (isLandscape) {
+        imgRight.src = images[currentIndex];
+        imgRight.classList.remove("img-hidden");
+        if (currentIndex + 1 < images.length) {
+          imgLeft.src = images[currentIndex + 1];
+          imgLeft.classList.remove("img-hidden");
+          pageText.innerText = (currentIndex + 1) + "-" + (currentIndex + 2);
+        } else {
+          imgLeft.classList.add("img-hidden");
+          pageText.innerText = (currentIndex + 1);
+        }
+      } else {
+        imgLeft.src = images[currentIndex];
+        imgLeft.classList.remove("img-hidden");
+        imgRight.classList.add("img-hidden");
+        pageText.innerText = (currentIndex + 1);
+      }
+    }
+  }
+
+  function changePage(isNext) {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    if (isNext) {
+      if (currentIndex === 0) { currentIndex = 1; }
+      else {
+        const step = isLandscape ? 2 : 1;
+        if (currentIndex + step >= images.length) { alert("最後のページです"); location.href = "manga-list.html"; return; }
+        currentIndex += step;
+      }
+    } else {
+      if (currentIndex <= 1) { currentIndex = 0; }
+      else { currentIndex -= (isLandscape ? 2 : 1); }
+    }
+    updateDisplay();
+  }
+
+  updateDisplay();
+  window.addEventListener('resize', updateDisplay);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') changePage(true);
+    if (e.key === 'ArrowRight') changePage(false);
+  });
+</script>
+</body>
+</html>

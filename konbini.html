@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漫画ビューア</title>
+  <style>
+    body { background-color: #1a1a1a; color: white; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
+    
+    .manga-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 90vh;
+      width: 100vw;
+      margin-top: 10px;
+    }
+
+    .manga-container {
+      position: relative;
+      display: flex;
+      flex-direction: row-reverse; /* 右から左へ並べる */
+      height: 100%;
+      max-width: 95%;
+    }
+
+    .manga-image {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      border: 1px solid #333;
+    }
+
+    /* デフォルト：2枚表示（PC・スマホ横向き） */
+    .img-hidden { display: none !important; }
+
+    /* スマホ縦向きは常に1枚表示 */
+    @media (orientation: portrait) and (max-width: 768px) {
+      .img-second { display: none; }
+      .manga-container { width: 100%; }
+      .manga-image { width: 100%; height: auto; }
+    }
+
+    .touch-area {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      z-index: 10;
+      cursor: pointer;
+    }
+    .next-area { left: 0; }  /* 左クリックで進む */
+    .prev-area { right: 0; } /* 右クリックで戻る */
+
+    .page-info { position: fixed; bottom: 10px; width: 100%; text-align: center; font-size: 0.9em; color: #ccc; }
+    nav { background-color: #333; padding: 10px 0; text-align: center; }
+    nav a { color: white; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="manga-list.html">一覧に戻る</a>
+</nav>
+
+<div class="manga-wrapper">
+  <div class="manga-container">
+    <img id="manga-image-right" class="manga-image" src="" alt="page-right">
+    <img id="manga-image-left" class="manga-image" src="" alt="page-left">
+
+    <div class="touch-area next-area" onclick="changePage(true)"></div>
+    <div class="touch-area prev-area" onclick="changePage(false)"></div>
+  </div>
+</div>
+
+<div class="page-info">
+  <span id="current-page">1</span> / <span id="total-pages">0</span>
+</div>
+
+<script>
+  const images = [
+    "https://lh3.googleusercontent.com/d/1ddWchYmWGrKiByxywtfWP0QzjKMFFRjN", // こんびに_001.jpg
+"https://lh3.googleusercontent.com/d/10cXzmTAo_4da4DqcIBL-vl9qjNy3yO8l", // こんびに_002.jpg
+"https://lh3.googleusercontent.com/d/1jDahuvS-rcRYBFKdwaiRt68msUS-A5df", // こんびに_003.jpg
+"https://lh3.googleusercontent.com/d/1iQ-2LBoCC5SiGeWGV9wt_QYr5ipwbodW", // こんびに_004.jpg
+"https://lh3.googleusercontent.com/d/1PN9wgncBy1YZNsSlcZsvSA7oi3yd3CtN", // こんびに_005.jpg
+"https://lh3.googleusercontent.com/d/1IFx1DE4bZ0tPiFrU1jO9RADaCCHIemtd", // こんびに_006.jpg
+"https://lh3.googleusercontent.com/d/1vCCCz2pEKyKAbPP-MoFnnncwSA2cfFpf", // こんびに_007.jpg
+"https://lh3.googleusercontent.com/d/1w0UnOiNnTj9qyLf_cLdseF50FuYVA3zh", // こんびに_008.jpg
+"https://lh3.googleusercontent.com/d/1Y2piBQJctHmrs9y2R1nk1dTPQzFDP6E5", // こんびに_009.jpg
+"https://lh3.googleusercontent.com/d/1wlLzoaojvFjUc_v77lcKja-mbtnxhREN", // こんびに_010.jpg
+"https://lh3.googleusercontent.com/d/1TcGG22jErItffwfvEqsUkpC8tEgQyyKY", // こんびに_011.jpg
+"https://lh3.googleusercontent.com/d/1HjKpJjB9PzH-G1l99yv-eQZXVuM21mes", // こんびに_012.jpg
+"https://lh3.googleusercontent.com/d/1-0QP7g9Woq3Nx922htpnmrvdHtsMD-Tz", // こんびに_013.jpg
+"https://lh3.googleusercontent.com/d/1gm-3AWGEIHUYOg-OwyhV-bosBncEuaWk", // こんびに_014.jpg
+"https://lh3.googleusercontent.com/d/13QzU5hJXYTay_aNxTKXgYKFIlvBxyxp1", // こんびに_015.jpg
+"https://lh3.googleusercontent.com/d/1FpOgooIYHZpelPUG5TWpmwmTQrv2aDS9", // こんびに_016.jpg
+"https://lh3.googleusercontent.com/d/19_vc-SX8mkqskVx4Wgel5iUN93hSBwMK", // こんびに_017.jpg
+"https://lh3.googleusercontent.com/d/1PkXK8gkzA-rjBDAVFZWVjsSIleKM3jbb", // こんびに_018.jpg
+  ];
+
+  let currentIndex = 0;
+  const imgRight = document.getElementById("manga-image-right");
+  const imgLeft = document.getElementById("manga-image-left");
+  const pageText = document.getElementById("current-page");
+  document.getElementById("total-pages").innerText = images.length;
+
+  function updateDisplay() {
+    const isLandscape = window.innerWidth > window.innerHeight;
+
+    if (currentIndex === 0) {
+      // 1枚目（表紙）は常に左側に1枚だけ表示
+      imgLeft.src = images[0];
+      imgLeft.classList.remove("img-hidden");
+      imgRight.classList.add("img-hidden");
+      pageText.innerText = "1";
+    } else {
+      if (isLandscape) {
+        // 横画面：右に偶数、左に奇数ページを表示
+        imgRight.src = images[currentIndex];
+        imgRight.classList.remove("img-hidden");
+        
+        if (currentIndex + 1 < images.length) {
+          imgLeft.src = images[currentIndex + 1];
+          imgLeft.classList.remove("img-hidden");
+          pageText.innerText = (currentIndex + 1) + "-" + (currentIndex + 2);
+        } else {
+          imgLeft.classList.add("img-hidden");
+          pageText.innerText = (currentIndex + 1);
+        }
+      } else {
+        // 縦画面：1枚のみ表示
+        imgLeft.src = images[currentIndex];
+        imgLeft.classList.remove("img-hidden");
+        imgRight.classList.add("img-hidden");
+        pageText.innerText = (currentIndex + 1);
+      }
+    }
+  }
+
+  function changePage(isNext) {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    
+    if (isNext) {
+      if (currentIndex === 0) {
+        currentIndex = 1; // 1枚目からは次は必ず2枚目へ
+      } else {
+        const step = isLandscape ? 2 : 1;
+        if (currentIndex + step >= images.length) {
+          alert("最後のページです");
+          location.href = "manga-list.html";
+          return;
+        }
+        currentIndex += step;
+      }
+    } else {
+      if (currentIndex <= 1) {
+        currentIndex = 0;
+      } else {
+        const step = isLandscape ? 2 : 1;
+        currentIndex -= step;
+      }
+    }
+    updateDisplay();
+  }
+
+  updateDisplay();
+
+  window.addEventListener('resize', updateDisplay);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') changePage(true);
+    if (e.key === 'ArrowRight') changePage(false);
+  });
+</script>
+
+</body>
+</html>

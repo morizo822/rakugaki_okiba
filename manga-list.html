@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>漫画一覧 - らくがき置き場</title>
+  <style>
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
+    
+    /* コンテナ設定 */
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; color: #444; margin-bottom: 30px; }
+
+    /* 漫画カードのスタイル */
+    .manga-card {
+      display: flex;
+      background: white;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .manga-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    /* 表紙画像（左側） */
+    .manga-cover {
+      width: 150px;
+      height: 210px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* 作品説明（右側） */
+    .manga-details {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .manga-title {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+
+    .manga-desc {
+      font-size: 0.95em;
+      color: #666;
+      margin: 0;
+    }
+
+    .manga-meta {
+      margin-top: 15px;
+      font-size: 0.85em;
+      color: #999;
+    }
+
+    /* スマホ表示用の調整 */
+    @media (max-width: 600px) {
+      .manga-card { flex-direction: column; }
+      .manga-cover { width: 100%; height: 250px; }
+      .manga-title { font-size: 1.2em; }
+    }
+  </style>
+</head>
+<body>
+
+<nav style="background-color: #333; padding: 15px 0; text-align: center; margin-bottom: 20px;">
+  <a href="index.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">ホーム</a>
+  <a href="archive.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">過去の作品集</a>
+  <a href="manga-list.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">漫画</a>
+</nav>
+
+<div class="container">
+  <h1>公開中の漫画</h1>
+
+  <a href="manga.html" class="manga-card">
+    <img src="z/manga/cover01.jpg" alt="作品1の表紙" class="manga-cover">
+    <div class="manga-details">
+      <p class="manga-title">鴨志田の王 一話</p>
+      <p class="manga-desc">今宵、二人の運命は動き出す。</p>
+      <p class="manga-meta">全28ページ / 2025.01.09 更新</p>
+    </div>
+  </a>
+
+  <a href="konbini.html" class="manga-card">
+    <img src="z/manga/konbini/cover02.jpg" alt="作品2の表紙" class="manga-cover">
+    <div class="manga-details">
+      <p class="manga-title">コンビニ踏破を夢見る男達</p>
+      <p class="manga-desc">男たちは、それでも夢を追い続ける。</p>
+      <p class="manga-meta">全18ページ / 2026.05.07 更新</p>
+    </div>
+  </a>
+
+</div>
+
+</body>
+</html>
