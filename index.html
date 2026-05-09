@@ -36,14 +36,18 @@
 </div>
 
 <hr>
-<h3>みんなのコメント</h3>
-<div id="commentList">読み込み中...</div>
+
+<div style="display: flex; align-items: center; gap: 15px;">
+  <h3 style="margin: 0;">みんなのコメント</h3>
+  <button type="button" onclick="loadComments()" style="padding: 2px 10px; cursor: pointer;">更新</button>
+</div>
+
+<div id="commentList" style="margin-top: 15px;">読み込み中...</div>
 
 <script>
-// 【重要】GASで「新しいデプロイ」を行った際の最新URLをここに貼り付けてください
+// GASのURL
 const gasUrl = "https://script.google.com/macros/s/AKfycbyL3L31XzrX53VS4kvDNgxAuYmunkmbYBku06qtMhzzd6o7-47rJ4L-SrHBlA2uGdSr/exec";
 
-// ページが読み込まれたらコメントを表示
 window.onload = function() {
   loadComments();
 };
@@ -69,8 +73,6 @@ async function sendData() {
     });
     
     alert("送信しました！");
-    
-    // 【自動更新機能】ページをリロードして最新のコメントを表示
     location.reload(); 
     
   } catch (error) {
@@ -82,6 +84,7 @@ async function sendData() {
 // 2. データを読み込んで表示する関数
 async function loadComments() {
   const listContainer = document.getElementById("commentList");
+  listContainer.innerHTML = "読み込み中..."; 
 
   try {
     const response = await fetch(gasUrl);
@@ -94,6 +97,20 @@ async function loadComments() {
       return;
     }
 
+    // 特別な記号を無害化する関数（サニタイズ）
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m];
+      });
+    }
+
     data.forEach(item => {
       const div = document.createElement("div");
       div.className = "art-work";
@@ -102,9 +119,13 @@ async function loadComments() {
       
       const date = new Date(item.date).toLocaleString();
       
+      // 無害化した名前とコメントを使用
+      const safeName = escapeHtml(item.name);
+      const safeComment = escapeHtml(item.comment);
+      
       div.innerHTML = `
-        <p style="font-size: 0.8em; color: #666;">${date} - <strong>${item.name}</strong> さん</p>
-        <p>${item.comment}</p>
+        <p style="font-size: 0.8em; color: #666;">${date} - <strong>${safeName}</strong> さん</p>
+        <p>${safeComment.replace(/\n/g, '<br>')}</p>
       `;
       listContainer.appendChild(div);
     });
