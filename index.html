@@ -1,0 +1,151 @@
+<html>
+<head>
+<link href="style.css" rel="stylesheet" type="text/css">
+<title>ラクガキ置き場</title>
+</head>
+
+<body>
+
+  
+<h1 class="logo-container">
+  <img src="z/taitoru_logo.JPG" alt="ラクガキ置き場" width="1260">
+</h1>
+
+<nav style="background-color: #333; padding: 15px 0; text-align: center; margin-bottom: 20px;">
+  <a href="index.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">ホーム</a>
+  <a href="archive.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">過去の作品集</a>
+</nav>
+
+こんちくわ～<p>
+<p style="text-align: right;">あなたは <strong><span id="accessCount">...</span></strong> 人目の訪問者です！</p>
+
+<h2>画像、こうかいしちゃいます</h2>
+授業中に描きました<p>
+</br>
+使用ソフトはペイント<p>
+
+<h2>最新のラクガキ！</h2>
+<img src="z/komori_discoOK.JPG" alt="latest-art" width="630" height="315">
+
+<div style="margin: 30px 0; padding: 20px; border: 2px dashed #ccc; text-align: center;">
+  <p style="font-size: 1.2em;">他にもたくさん描いています</p>
+  <a href="archive.html" style="font-size: 1.5em; font-weight: bold; color: #007bff;">過去の作品集を見に行く →</a>
+</div>
+
+<div class="art-work" style="text-align: center;">
+  <h3>スポンサーリンク</h3>
+  <a href="https://duel-2fb14.web.app/" target="_blank">
+    <img src="z/imasiko.jpg" alt="MAHO_FERA" width="300">
+  </a>
+</div>
+<hr>
+
+<div class="art-work">
+  <h3>ひとこと掲示板</h3>
+  <p>感想を書いてね！</p>
+  <input type="text" id="userName" placeholder="なまえ" style="width: 200px;"><br>
+  <textarea id="userComment" placeholder="コメント" style="width: 300px; height: 100px; margin-top: 10px;"></textarea><br>
+  <button type="button" onclick="sendData()" style="margin-top: 10px; padding: 5px 20px;">送信する</button>
+</div>
+
+<hr>
+
+<div style="display: flex; align-items: center; gap: 15px;">
+  <h3 style="margin: 0;">みんなのコメント</h3>
+  <button type="button" onclick="loadComments()" style="padding: 2px 10px; cursor: pointer;">更新</button>
+</div>
+
+<div id="commentList" style="margin-top: 15px;">読み込み中...</div>
+
+<script>
+// 【重要】新しいデプロイで発行された最新のURL（末尾が /exec のもの）を貼り付けてください
+const gasUrl = "https://script.google.com/macros/s/AKfycbwb9UFHfEIBzC-mKJfAqb1VE0teqc9hgMhiV7f4JMDFgIJnHZzMqowDpjF9iEBqR3_A/exec";
+
+window.onload = function() {
+  loadComments();
+};
+
+// 1. データを送信する関数
+async function sendData() {
+  const name = document.getElementById("userName").value;
+  const comment = document.getElementById("userComment").value;
+
+  if (!name || !comment) {
+    alert("なまえとコメントを入力してね！");
+    return;
+  }
+
+  const data = { name: name, comment: comment };
+
+  try {
+    await fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    
+    alert("送信しました！");
+    location.reload(); 
+    
+  } catch (error) {
+    console.error("エラー:", error);
+    alert("通信に失敗しました。");
+  }
+}
+
+// 2. データを読み込んで表示する関数
+async function loadComments() {
+  const listContainer = document.getElementById("commentList");
+  const countDisplay = document.getElementById("accessCount"); 
+  
+  listContainer.innerHTML = "読み込み中..."; 
+
+  try {
+    const response = await fetch(gasUrl);
+    const result = await response.json();
+
+    if (result.counter !== undefined) {
+      countDisplay.innerText = result.counter;
+    }
+
+    listContainer.innerHTML = ""; 
+
+    if (!result.comments || result.comments.length === 0) {
+      listContainer.innerHTML = "<p>まだコメントはありません。</p>";
+      return;
+    }
+
+    function escapeHtml(str) {
+      // コメントが数字（37564など）の場合でも文字列に変換して処理するように修正
+      const stringStr = String(str || "");
+      return stringStr.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    result.comments.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "art-work";
+      div.style.display = "block";
+      div.style.marginBottom = "10px";
+      
+      const date = new Date(item.date).toLocaleString();
+      const safeName = escapeHtml(item.name);
+      const safeComment = escapeHtml(item.comment);
+      
+      div.innerHTML = `
+        <p style="font-size: 0.8em; color: #666;">${date} - <strong>${safeName}</strong> さん</p>
+        <p>${safeComment.replace(/\n/g, '<br>')}</p>
+      `;
+      listContainer.appendChild(div);
+    });
+  } catch (error) {
+    console.error("読み込みエラー:", error);
+    listContainer.innerHTML = "<p>コメントの読み込みに失敗しました。</p>";
+  }
+}
+</script>
+
+</body>
+</html>
