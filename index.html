@@ -10,6 +10,8 @@
 </h1>
 
 こんちくわ～<p>
+<p style="text-align: right;">あなたは <strong><span id="accessCount">...</span></strong> 人目の訪問者です！</p>
+
 <h2>画像、こうかいしちゃいます</h2>
 授業中に描きました<p>
 </br>
@@ -45,8 +47,8 @@
 <div id="commentList" style="margin-top: 15px;">読み込み中...</div>
 
 <script>
-// GASのURL
-const gasUrl = "https://script.google.com/macros/s/AKfycbyL3L31XzrX53VS4kvDNgxAuYmunkmbYBku06qtMhzzd6o7-47rJ4L-SrHBlA2uGdSr/exec";
+// 【重要】新しいデプロイで発行された最新のURL（末尾が /exec のもの）を貼り付けてください
+const gasUrl = "https://script.google.com/macros/s/AKfycbxpeKBzyrIDOaPScfhVjVPlo4boD5fIJIY_YoyPSvQ7D8BFGtHa71UgAg5dFqagaS_w/exec";
 
 window.onload = function() {
   loadComments();
@@ -84,42 +86,41 @@ async function sendData() {
 // 2. データを読み込んで表示する関数
 async function loadComments() {
   const listContainer = document.getElementById("commentList");
+  const countDisplay = document.getElementById("accessCount"); 
+  
   listContainer.innerHTML = "読み込み中..."; 
 
   try {
     const response = await fetch(gasUrl);
-    const data = await response.json();
+    const result = await response.json();
+
+    // カウンターの反映
+    if (result.counter !== undefined) {
+      countDisplay.innerText = result.counter;
+    }
 
     listContainer.innerHTML = ""; 
 
-    if (data.length === 0) {
+    // コメントリストの表示
+    if (!result.comments || result.comments.length === 0) {
       listContainer.innerHTML = "<p>まだコメントはありません。</p>";
       return;
     }
 
-    // 特別な記号を無害化する関数（サニタイズ）
     function escapeHtml(str) {
       if (!str) return "";
       return str.replace(/[&<>"']/g, function(m) {
-        return {
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          '"': '&quot;',
-          "'": '&#39;'
-        }[m];
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
       });
     }
 
-    data.forEach(item => {
+    result.comments.forEach(item => {
       const div = document.createElement("div");
       div.className = "art-work";
       div.style.display = "block";
       div.style.marginBottom = "10px";
       
       const date = new Date(item.date).toLocaleString();
-      
-      // 無害化した名前とコメントを使用
       const safeName = escapeHtml(item.name);
       const safeComment = escapeHtml(item.comment);
       
