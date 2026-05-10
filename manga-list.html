@@ -4,77 +4,100 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>漫画一覧 - らくがき置き場</title>
+  <link href="style.css" rel="stylesheet" type="text/css">
   <style>
-    body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
+    body { 
+      font-family: 'Helvetica Neue', Arial, sans-serif; 
+      line-height: 1.6; 
+      margin: 0; 
+      padding: 0;
+      color: #333; 
+    }
     
-    /* コンテナ設定 */
-    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-    h1 { text-align: center; color: #444; margin-bottom: 30px; }
+    .container { 
+      max-width: 900px; 
+      margin: 40px auto; 
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 15px;
+      /* コンテナ内の文字を基本的に左寄せにする */
+      text-align: left !important;
+    }
 
-    /* 漫画カードのスタイル */
+    h1 { 
+      text-align: center; /* タイトルだけは中央 */
+      color: #444; 
+      margin-bottom: 30px; 
+    }
+
     .manga-card {
-      display: flex;
+      display: flex !important;
       background: white;
-      margin-bottom: 20px;
-      border-radius: 8px;
+      margin-bottom: 25px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: transform 0.3s ease;
       text-decoration: none;
       color: inherit;
+      /* カード内の要素を強制的に左寄せ */
+      text-align: left !important;
+      justify-content: flex-start !important;
     }
 
-    .manga-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    }
+    .manga-card:hover { transform: translateY(-5px); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
 
-    /* 表紙画像（左側） */
     .manga-cover {
-      width: 150px;
-      height: 210px;
+      width: 180px;
+      height: 250px;
       object-fit: cover;
       flex-shrink: 0;
+      display: block !important;
+      /* 外部CSSによる中央寄せ(margin: auto)を打ち消す */
+      margin: 0 !important;
     }
 
-    /* 作品説明（右側） */
     .manga-details {
-      padding: 20px;
+      padding: 25px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      /* 文字を左寄せ */
+      align-items: flex-start !important;
+      text-align: left !important;
     }
 
-    .manga-title {
-      font-size: 1.4em;
-      font-weight: bold;
-      margin: 0 0 10px 0;
-      color: #007bff;
+    .manga-title { 
+      font-size: 1.6em; 
+      font-weight: bold; 
+      margin: 0 0 10px 0; 
+      color: #007bff; 
+      text-align: left !important;
     }
 
-    .manga-desc {
-      font-size: 0.95em;
-      color: #666;
-      margin: 0;
+    .manga-desc { 
+      font-size: 1em; 
+      color: #555; 
+      margin: 0; 
+      text-align: left !important;
     }
 
-    .manga-meta {
-      margin-top: 15px;
-      font-size: 0.85em;
-      color: #999;
+    .manga-meta { 
+      margin-top: 15px; 
+      font-size: 0.85em; 
+      color: #888; 
     }
 
-    /* スマホ表示用の調整 */
     @media (max-width: 600px) {
       .manga-card { flex-direction: column; }
-      .manga-cover { width: 100%; height: 250px; }
-      .manga-title { font-size: 1.2em; }
+      .manga-cover { width: 100%; height: 280px; }
+      .container { margin: 20px 10px; }
     }
   </style>
 </head>
 <body>
 
-<nav style="background-color: #333; padding: 15px 0; text-align: center; margin-bottom: 20px;">
+<nav style="background-color: #333; padding: 15px 0; text-align: center;">
   <a href="index.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">ホーム</a>
   <a href="archive.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">過去の作品集</a>
   <a href="manga-list.html" style="color: white; margin: 0 20px; text-decoration: none; font-weight: bold;">漫画</a>
@@ -83,24 +106,23 @@
 <div class="container">
   <h1>公開中の漫画</h1>
 
-<a href="kamoshida-episodes.html" class="manga-card">
-    <img src="z/manga/cover01.jpg" alt="鴨志田の王 バナー" class="manga-cover">
+  <a href="kamoshida-episodes.html" class="manga-card">
+    <img src="z/manga/cover01.jpg" alt="鴨志田の王" class="manga-cover">
     <div class="manga-details">
       <p class="manga-title">鴨志田の王</p>
       <p class="manga-desc">今宵、二人の運命は動き出す。シリーズ連載中。</p>
-      <p class="manga-meta">最新話：第1話 / 2025.01.09 更新</p>
+      <p class="manga-meta">最新話：第9話 / 2026.02.10 更新</p>
     </div>
   </a>
 
   <a href="konbini.html" class="manga-card">
-    <img src="z/manga/konbini/cover02.jpg" alt="作品2の表紙" class="manga-cover">
+    <img src="z/manga/konbini/cover02.jpg" alt="作品2" class="manga-cover">
     <div class="manga-details">
       <p class="manga-title">コンビニ踏破を夢見る男達</p>
       <p class="manga-desc">男たちは、それでも夢を追い続ける。</p>
       <p class="manga-meta">全18ページ / 2026.05.07 更新</p>
     </div>
   </a>
-
 </div>
 
 </body>

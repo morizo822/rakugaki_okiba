@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鴨志田の王 エピソード一覧 - らくがき置き場</title>
+  <link href="style.css" rel="stylesheet" type="text/css">
   <style>
     :root {
       --primary-color: #007bff;
-      --bg-color: #f8f9fa;
       --card-bg: #ffffff;
       --text-main: #333;
     }
@@ -17,22 +17,19 @@
       line-height: 1.6; 
       margin: 0; 
       padding: 0; 
-      background-color: var(--bg-color); 
+      /* 背景色や画像はstyle.cssから引き継ぎます */
       color: var(--text-main); 
     }
 
     .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
     h1 { text-align: center; color: #222; margin-bottom: 40px; font-size: 2rem; letter-spacing: 0.1em; }
     
-    /* エピソードリストのグリッド設定 */
     .episode-grid { 
       display: grid; 
-      /* スマホなら2列、PCなら3列以上に自動調整 */
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
       gap: 30px; 
     }
 
-    /* エピソードカードのスタイル */
     .episode-card {
       background: var(--card-bg);
       border-radius: 12px;
@@ -53,17 +50,16 @@
       border-color: var(--primary-color);
     }
 
-    /* サムネイル画像（高さを統一し、object-fitで綺麗に切り抜く） */
     .episode-thumb-container {
       width: 100%;
-      height: 160px; /* ここの数値を変えることで高さを調節できます */
+      height: 160px; 
       overflow: hidden;
     }
 
     .episode-thumb { 
       width: 100%; 
       height: 100%; 
-      object-fit: cover; /* サイズが違う画像も隙間なく表示 */
+      object-fit: cover; 
       background-color: #ddd; 
       transition: transform 0.5s ease;
     }
@@ -79,20 +75,16 @@
       font-size: 1.1em;
     }
 
-    /* ナビゲーションバー */
-    nav { background-color: #1a1a1a; padding: 20px 0; text-align: center; }
+    /* ナビゲーションバーを他のページと統一 */
+    nav { background-color: #333; padding: 15px 0; text-align: center; margin-bottom: 20px; }
     nav a { 
-      color: #fff; 
-      margin: 0 15px; 
+      color: white; 
+      margin: 0 20px; 
       text-decoration: none; 
-      font-size: 14px; 
-      font-weight: 600;
-      opacity: 0.8;
-      transition: opacity 0.3s;
+      font-weight: bold;
+      font-size: 14px;
     }
-    nav a:hover { opacity: 1; }
 
-    /* スマホ用の微調整 */
     @media (max-width: 500px) {
       .episode-grid { 
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
@@ -107,6 +99,7 @@
 
 <nav>
   <a href="index.html">ホーム</a>
+  <a href="archive.html">過去の作品集</a>
   <a href="manga-list.html">漫画一覧に戻る</a>
 </nav>
 
@@ -156,27 +149,26 @@
       <div class="episode-title">第6話</div>
     </a>
 
- <a href="kamoshida_7.html" class="episode-card">
+    <a href="kamoshida_7.html" class="episode-card">
       <div class="episode-thumb-container">
-        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+        <img src="z/manga/cover01.jpg" alt="第7話" class="episode-thumb">
       </div>
       <div class="episode-title">第7話</div>
     </a>
 
- <a href="kamoshida_8.html" class="episode-card">
+    <a href="kamoshida_8.html" class="episode-card">
       <div class="episode-thumb-container">
-        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+        <img src="z/manga/cover01.jpg" alt="第8話" class="episode-thumb">
       </div>
       <div class="episode-title">第8話</div>
     </a>
 
- <a href="kamoshida_9.html" class="episode-card">
+    <a href="kamoshida_9.html" class="episode-card">
       <div class="episode-thumb-container">
-        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+        <img src="z/manga/cover01.jpg" alt="第9話" class="episode-thumb">
       </div>
       <div class="episode-title">第9話</div>
     </a>
-
   </div>
 </div>
 
