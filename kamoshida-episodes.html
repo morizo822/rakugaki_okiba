@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>鴨志田の王 エピソード一覧 - らくがき置き場</title>
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #333;
+    }
+
+    body { 
+      font-family: 'Helvetica Neue', Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif; 
+      line-height: 1.6; 
+      margin: 0; 
+      padding: 0; 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+    h1 { text-align: center; color: #222; margin-bottom: 40px; font-size: 2rem; letter-spacing: 0.1em; }
+    
+    /* エピソードリストのグリッド設定 */
+    .episode-grid { 
+      display: grid; 
+      /* スマホなら2列、PCなら3列以上に自動調整 */
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+      gap: 30px; 
+    }
+
+    /* エピソードカードのスタイル */
+    .episode-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s ease;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .episode-card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12); 
+      border-color: var(--primary-color);
+    }
+
+    /* サムネイル画像（高さを統一し、object-fitで綺麗に切り抜く） */
+    .episode-thumb-container {
+      width: 100%;
+      height: 160px; /* ここの数値を変えることで高さを調節できます */
+      overflow: hidden;
+    }
+
+    .episode-thumb { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; /* サイズが違う画像も隙間なく表示 */
+      background-color: #ddd; 
+      transition: transform 0.5s ease;
+    }
+
+    .episode-card:hover .episode-thumb {
+      transform: scale(1.05);
+    }
+
+    .episode-title { 
+      padding: 15px; 
+      font-weight: bold; 
+      color: var(--primary-color); 
+      font-size: 1.1em;
+    }
+
+    /* ナビゲーションバー */
+    nav { background-color: #1a1a1a; padding: 20px 0; text-align: center; }
+    nav a { 
+      color: #fff; 
+      margin: 0 15px; 
+      text-decoration: none; 
+      font-size: 14px; 
+      font-weight: 600;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+    nav a:hover { opacity: 1; }
+
+    /* スマホ用の微調整 */
+    @media (max-width: 500px) {
+      .episode-grid { 
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+        gap: 15px; 
+      }
+      .episode-thumb-container { height: 100px; }
+      .episode-title { padding: 10px; font-size: 0.9em; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">ホーム</a>
+  <a href="manga-list.html">漫画一覧に戻る</a>
+</nav>
+
+<div class="container">
+  <h1>鴨志田の王</h1>
+  
+  <div class="episode-grid">
+    <a href="manga.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第1話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第1話</div>
+    </a>
+    
+    <a href="kamoshida_2.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第2話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第2話</div>
+    </a>
+    
+    <a href="kamoshida_3.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第3話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第3話</div>
+    </a>
+    
+    <a href="kamoshida_4.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第4話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第4話</div>
+    </a>
+    
+    <a href="kamoshida_5.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第5話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第5話</div>
+    </a>
+    
+    <a href="kamoshida_6.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第6話</div>
+    </a>
+
+ <a href="kamoshida_6.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第7話</div>
+    </a>
+
+ <a href="kamoshida_6.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第8話</div>
+    </a>
+
+ <a href="kamoshida_6.html" class="episode-card">
+      <div class="episode-thumb-container">
+        <img src="z/manga/cover01.jpg" alt="第6話" class="episode-thumb">
+      </div>
+      <div class="episode-title">第9話</div>
+    </a>
+
+  </div>
+</div>
+
+</body>
+</html>

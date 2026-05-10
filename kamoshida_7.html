@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>漫画ビューア</title>
+  <style>
+    body { background-color: #1a1a1a; color: white; margin: 0; padding: 0; font-family: sans-serif; overflow: hidden; }
+    
+    /* 漫画表示エリア */
+    .manga-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .manga-container {
+      position: relative;
+      display: flex;
+      flex-direction: row-reverse;
+      height: 100%;
+      max-width: 100%;
+    }
+
+    .manga-image {
+      height: 100%;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .img-hidden { display: none !important; }
+
+    /* UIオーバーレイ */
+    .ui-overlay {
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .ui-visible { opacity: 1; pointer-events: auto; }
+
+    nav { top: 0; background-color: rgba(51, 51, 51, 0.8); padding: 15px 0; text-align: center; }
+    nav a { color: white; text-decoration: none; font-size: 14px; margin: 0 15px; }
+
+    .controls-bottom { bottom: 0; background-color: rgba(0, 0, 0, 0.6); padding: 20px 0; text-align: center; }
+
+    #fullscreen-btn {
+      background: #444;
+      color: white;
+      border: 1px solid #666;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .page-info { font-size: 0.9em; color: #ccc; }
+
+    /* タッチ・クリックエリア設定 */
+    .center-touch {
+      position: absolute;
+      top: 15%;
+      left: 25%;
+      width: 50%;
+      height: 70%;
+      z-index: 50;
+      cursor: pointer;
+    }
+
+    .side-touch { position: absolute; top: 0; height: 100%; width: 25%; z-index: 40; cursor: pointer; }
+    .next-area { left: 0; }
+    .prev-area { right: 0; }
+
+    @media (orientation: portrait) and (max-width: 768px) {
+      .manga-container { width: 100%; }
+      .manga-image { width: 100%; height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="nav-ui" class="ui-overlay">
+  <a href="manga-list.html">一覧に戻る</a>
+</nav>
+
+<div class="manga-wrapper" id="viewer">
+  <div class="manga-container">
+    <img id="manga-image-right" class="manga-image" src="" alt="">
+    <img id="manga-image-left" class="manga-image" src="" alt="">
+
+    <div class="side-touch next-area" onclick="changePage(true)"></div>
+    <div class="center-touch" onclick="toggleUI()"></div>
+    <div class="side-touch prev-area" onclick="changePage(false)"></div>
+  </div>
+</div>
+
+<div id="footer-ui" class="ui-overlay controls-bottom">
+  <button id="fullscreen-btn" onclick="toggleFullscreen()">全画面表示</button>
+  <div class="page-info">
+    <span id="current-page">1</span> / <span id="total-pages">0</span>
+  </div>
+</div>
+
+<script>
+  // --- ここにGASで取得した画像URLリストを貼り付けてください ---
+ const images = [
+"https://lh3.googleusercontent.com/d/1cvOfzxARyag0w3sNwfqfoATKaTarDldd", // コミック67_001.jpg
+"https://lh3.googleusercontent.com/d/1CyUoINAjSa-h1UPzdV5EWHREh07FFWHn", // コミック67_002.jpg
+"https://lh3.googleusercontent.com/d/1qpRTer5NzTOZRsX-Tdc2FZcikkpWx3_j", // コミック67_003.jpg
+"https://lh3.googleusercontent.com/d/1bVGwjjAc4D0gQUxTXZZsSSs4_O8ZifIR", // コミック67_004.jpg
+"https://lh3.googleusercontent.com/d/1M71OGYrbZVz7flBpEnrYIQ0iphxPdSwY", // コミック67_005.jpg
+"https://lh3.googleusercontent.com/d/1_osF8YV5WYEUh-SIoq6y60KV8E4zCAWf", // コミック67_006.jpg
+"https://lh3.googleusercontent.com/d/1MT1mZoAtniM3khgqg6aomfNbPYs6XT8y", // コミック67_007.jpg
+"https://lh3.googleusercontent.com/d/17NlvxjD5JKSbwz4xDi537QCdJFAKvpRQ", // コミック67_008.jpg
+"https://lh3.googleusercontent.com/d/1FcdPzgTMcBd033P2Yg8Qwzy_TnXddrpx", // コミック67_009.jpg
+"https://lh3.googleusercontent.com/d/1W3a7o4bta9mqmR8FNU709N27wC0aKzWg", // コミック67_010.jpg
+"https://lh3.googleusercontent.com/d/181Pad-7PqfAn08JeUephLdZPEnfYplG0", // コミック67_011.jpg
+"https://lh3.googleusercontent.com/d/13wnwc86NTyKfQCdAaY0TsyBpokMS7xjA", // コミック67_012.jpg
+"https://lh3.googleusercontent.com/d/1hh7LZtQU-0LcLD82qONHfbUjPFuaSJdQ", // コミック67_013.jpg
+"https://lh3.googleusercontent.com/d/1PHG18TEdsPazx72Dt1iQhurINsxSQIs_", // コミック67_014.jpg
+"https://lh3.googleusercontent.com/d/1W13iNp1xt23Oqh1HzyfZ3W-yacRtSTwd", // コミック67_015.jpg
+"https://lh3.googleusercontent.com/d/18RhTU6rPwnNqB6CnZX-2XMib0hZRdKJO", // コミック67_016.jpg
+"https://lh3.googleusercontent.com/d/1NeLVPPbSWJbgjdgNJp8NIbKqNjeCsGtQ", // コミック67_017.jpg
+"https://lh3.googleusercontent.com/d/1dbXlbWnw6K8AFcL33lxev-HMrLeTadPS", // コミック67_018.jpg
+"https://lh3.googleusercontent.com/d/1fP955XLq5mLxYPfhhhsLn6of7nprFN6n", // コミック67_019.jpg
+"https://lh3.googleusercontent.com/d/1NQEg91KT91EDWkvijGrUHxAfoD5KCs1p", // コミック67_020.jpg
+"https://lh3.googleusercontent.com/d/1wyj5WnTzyQee2_W5CMdp2PiQ6GohpW99", // コミック67_021.jpg
+"https://lh3.googleusercontent.com/d/1Vv47Z9A1QC3okXWojG5Oab6KsOxpPbjU", // コミック67_022.jpg
+"https://lh3.googleusercontent.com/d/1dC5Gn-VRyHlRO8n14IMPyeAVs4EjP6mu", // コミック67_023.jpg
+"https://lh3.googleusercontent.com/d/1ltOwe3g4A1u3Ylwxk2iK9G5O8sgL2tuA", // コミック67_024.jpg
+  ];
+
+  // -------------------------------------------------------
+
+  let currentIndex = 0;
+  let uiTimer;
+  const imgRight = document.getElementById("manga-image-right");
+  const imgLeft = document.getElementById("manga-image-left");
+  const pageText = document.getElementById("current-page");
+  document.getElementById("total-pages").innerText = images.length;
+
+  // UIの表示切り替え（3秒で自動消去 ＆ 再タップで手動消去）
+  function toggleUI() {
+    const nav = document.getElementById("nav-ui");
+    const footer = document.getElementById("footer-ui");
+    const isVisible = nav.classList.contains("ui-visible");
+
+    if (isVisible) {
+      nav.classList.remove("ui-visible");
+      footer.classList.remove("ui-visible");
+      clearTimeout(uiTimer);
+    } else {
+      nav.classList.add("ui-visible");
+      footer.classList.add("ui-visible");
+      clearTimeout(uiTimer);
+      uiTimer = setTimeout(() => {
+        nav.classList.remove("ui-visible");
+        footer.classList.remove("ui-visible");
+      }, 3000); // 3秒に変更
+    }
+  }
+
+  // 全画面表示の切り替え
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        alert(`全画面表示エラー: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  function updateDisplay() {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    if (currentIndex === 0) {
+      // 1枚目は左側に表示
+      imgLeft.src = images[0];
+      imgLeft.classList.remove("img-hidden");
+      imgRight.classList.add("img-hidden");
+      pageText.innerText = "1";
+    } else {
+      if (isLandscape) {
+        imgRight.src = images[currentIndex];
+        imgRight.classList.remove("img-hidden");
+        if (currentIndex + 1 < images.length) {
+          imgLeft.src = images[currentIndex + 1];
+          imgLeft.classList.remove("img-hidden");
+          pageText.innerText = (currentIndex + 1) + "-" + (currentIndex + 2);
+        } else {
+          imgLeft.classList.add("img-hidden");
+          pageText.innerText = (currentIndex + 1);
+        }
+      } else {
+        imgLeft.src = images[currentIndex];
+        imgLeft.classList.remove("img-hidden");
+        imgRight.classList.add("img-hidden");
+        pageText.innerText = (currentIndex + 1);
+      }
+    }
+  }
+
+  function changePage(isNext) {
+    const isLandscape = window.innerWidth > window.innerHeight;
+    if (isNext) {
+      if (currentIndex === 0) { currentIndex = 1; }
+      else {
+        const step = isLandscape ? 2 : 1;
+        if (currentIndex + step >= images.length) {
+          alert("最後のページです");
+          location.href = "manga-list.html";
+          return;
+        }
+        currentIndex += step;
+      }
+    } else {
+      if (currentIndex <= 1) { currentIndex = 0; }
+      else { currentIndex -= (isLandscape ? 2 : 1); }
+    }
+    updateDisplay();
+  }
+
+  // スマホのスワイプ操作
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+
+  document.addEventListener('touchend', e => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const swipeThreshold = 50;
+    if (touchEndX < touchStartX - swipeThreshold) changePage(true);  // 左スワイプで進む
+    if (touchEndX > touchStartX + swipeThreshold) changePage(false); // 右スワイプで戻る
+  }, false);
+
+  updateDisplay();
+  window.addEventListener('resize', updateDisplay);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') changePage(true);
+    if (e.key === 'ArrowRight') changePage(false);
+  });
+</script>
+</body>
+</html>
