@@ -3,33 +3,50 @@
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>過去の作品 - ラクガキ置き場</title>
 <style>
-  /* ギャラリーを綺麗に整列させるための追加スタイル */
+  /* ギャラリーを綺麗に整列させるためのスタイル */
   .image-grid {
     display: flex;
-    flex-wrap: wrap; /* 幅がいっぱいになったら自動で改行 */
-    gap: 20px;       /* 画像同士の隙間 */
-    justify-content: center; /* 中央寄せ */
+    flex-wrap: wrap; 
+    gap: 20px;       
+    justify-content: center; 
     padding: 20px;
   }
 
-  .image-grid img {
-    width: 300px;    /* 通常時のサイズを小さめに設定 */
-    height: 200px;   /* 高さを揃えると綺麗に見えます */
-    object-fit: cover; /* 画像の比率を保ちつつ枠を埋める */
+  .image-grid .art-card {
+    width: 300px;
+    background: white;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  .image-grid img {
+    width: 100%;
+    height: 200px;   
+    object-fit: cover; 
+    border-radius: 4px;
     transition: transform 0.3s ease;
   }
 
-  /* ホバー時に少し浮き上がる演出 */
   .image-grid img:hover {
     transform: scale(1.05);
   }
 
-  /* スマホなど画面が狭い時の調整 */
+  /* 投稿日ラベルのスタイル */
+  .date-label {
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: #666;
+    display: block;
+    font-weight: bold;
+  }
+
   @media (max-width: 600px) {
+    .image-grid .art-card {
+      width: 45%; 
+    }
     .image-grid img {
-      width: 45%; /* スマホでは2列にする */
       height: 150px;
     }
   }
@@ -55,14 +72,37 @@
 <h2 style="text-align: center;">これまでに描いた絵</h2>
 
 <div class="archive-section">
+  <h2 class="date-title" style="margin-left: 20px;">最近のラクガキ</h2>
+  <div id="auto-archive-grid" class="image-grid">
+    <p>読み込み中...</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="archive-section">
   <h2 class="date-title" style="margin-left: 20px;">2023年頃</h2>
-  
   <div class="image-grid">
-    <img src="z/messageImage_1713147487318.jpg" alt="latest" onclick="openImage(this)" style="cursor: zoom-in;">
-    <img src="z/nekonekonejkonejko.png" alt="neko" onclick="openImage(this)" style="cursor: zoom-in;">
-    <img src="z/ssdfghjbg.png" alt="neko" onclick="openImage(this)" style="cursor: zoom-in;">
-    <img src="z/ｷﾞｬﾗｸﾃｶスーパーネッコ.png" alt="neko" onclick="openImage(this)" style="cursor: zoom-in;">
-    <img src="z/スーパーオメガカブトムシZ.png" alt="neko" onclick="openImage(this)" style="cursor: zoom-in;">
+    <div class="art-card">
+      <img src="z/messageImage_1713147487318.jpg" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+      <span class="date-label">2023年投稿</span>
+    </div>
+    <div class="art-card">
+      <img src="z/nekonekonejkonejko.png" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+      <span class="date-label">2023年投稿</span>
+    </div>
+    <div class="art-card">
+      <img src="z/ssdfghjbg.png" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+      <span class="date-label">2023年投稿</span>
+    </div>
+    <div class="art-card">
+      <img src="z/ｷﾞｬﾗｸﾃｶスーパーネッコ.png" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+      <span class="date-label">2023年投稿</span>
+    </div>
+    <div class="art-card">
+      <img src="z/スーパーオメガカブトムシZ.png" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+      <span class="date-label">2023年投稿</span>
+    </div>
   </div>
 </div>
 
@@ -70,10 +110,41 @@
 <p style="text-align: center;"><a href="index.html">ホームへ戻る</a></p>
 
 <script>
+const gasImageApiUrl = "https://script.google.com/macros/s/AKfycbzTwWU4J7GvFgMLpWgFYcPpR_TFxHrxXIeb29gw8ZUkHGKVAEH_eDVhHixKoGAVKmlv/exec";
+
+async function loadArchiveImages() {
+  const grid = document.getElementById('auto-archive-grid');
+  try {
+    const response = await fetch(gasImageApiUrl);
+    const data = await response.json();
+
+    if (data.archive && data.archive.length > 0) {
+      grid.innerHTML = data.archive.map(item => {
+        // GASから送られてきた数値を日付形式に変換
+        const timestamp = item.date || item.updated;
+        const dateStr = timestamp ? new Date(timestamp).toLocaleDateString() : "日付不明";
+        
+        return `
+          <div class="art-card">
+            <img src="${item.url}" alt="art" onclick="openImage(this)" style="cursor: zoom-in;">
+            <span class="date-label">${dateStr} 更新</span>
+          </div>
+        `;
+      }).join('');
+    } else {
+      grid.innerHTML = "<p>過去の自動更新画像はありません。</p>";
+    }
+  } catch (e) {
+    console.error("読み込みエラー:", e);
+    grid.innerHTML = "<p>読み込みに失敗しました。</p>";
+  }
+}
+
+
+
 function openImage(imgElement) {
   const overlay = document.getElementById("imageOverlay");
   const fullImg = document.getElementById("fullImage");
-  
   fullImg.src = imgElement.src;
   overlay.style.display = "flex";
 }
@@ -81,6 +152,8 @@ function openImage(imgElement) {
 function closeImage() {
   document.getElementById("imageOverlay").style.display = "none";
 }
+
+window.onload = loadArchiveImages;
 </script>
 
 </body>
